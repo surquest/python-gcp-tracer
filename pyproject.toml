@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "surquest-GCP-tracer"
-version = "0.0.1rc1"
+version = "0.0.1rc6"
 description = "Wrapper around Google Cloud Platform (GCP) tracing library"
 authors = [
     {name= "Michal Švarc", email= "michal.svarc@surquest.com"}
@@ -12,7 +12,14 @@ authors = [
 readme = "README.md"
 dependencies = [
     "google-auth >= 2.10.0, < 3.0.0",
-    "opentelemetry-exporter-gcp-trace ~= 1.4.0"
+    "opentelemetry-exporter-gcp-trace ~= 1.4.0",
+    "starlette ~= 0.20.0"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.2.1",
+    "pytest-cov>=4.0.0",
 ]
 
 

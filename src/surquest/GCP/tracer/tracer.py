@@ -1,5 +1,6 @@
 import secrets
 import google.auth
+from starlette.requests import Request
 from opentelemetry import trace
 from opentelemetry.trace import NonRecordingSpan
 from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
@@ -10,7 +11,7 @@ from opentelemetry.sdk.trace.sampling import ALWAYS_ON
 
 class Tracer(object):
 
-    def __init__(self, request):
+    def __init__(self, request: Request = None):
 
         self._ctx = self._get_context(request)
         self._tracer = self._set_tracer()
@@ -55,6 +56,7 @@ class Tracer(object):
     def _set_tracer():
 
         tracer_provider = TracerProvider(sampler=ALWAYS_ON)  # always trace
+        trace.set_tracer_provider(tracer_provider)
         cloud_trace_exporter = CloudTraceSpanExporter()
         tracer_provider.add_span_processor(
             # BatchSpanProcessor buffers spans and sends them in batches in a
@@ -62,7 +64,7 @@ class Tracer(object):
             # tweaked to optimize your performance
             BatchSpanProcessor(cloud_trace_exporter)
         )
-        trace._set_tracer_provider(tracer_provider, False)
+        # trace._set_tracer_provider(tracer_provider, False)
 
         return trace.get_tracer(__name__)
 
@@ -75,17 +77,21 @@ class Tracer(object):
             "flags": "o=1",
         }
 
-        trace_context = request.headers.get('X-Cloud-Trace-Context', None)
+        trace_context = None
+
+        if request is not None:
+            trace_context = request.headers.get('X-Cloud-Trace-Context', None)
 
         if trace_context is not None:
 
             ctx['trace_id'] = trace_context.split('/')[0]
-            span = trace_context.split('/')[1].split(";")
+            if len(trace_context.split('/')) == 2:
+                span = trace_context.split('/')[1].split(";")
 
-            if len(span) > 1:
-                ctx['span_id'] = span[0]
-                ctx['flags'] = span[1]
-            else:
-                ctx['span_id'] = span[0]
+                if len(span) > 1:
+                    ctx['span_id'] = span[0]
+                    ctx['flags'] = span[1]
+                else:
+                    ctx['span_id'] = span[0]
 
         return ctx
