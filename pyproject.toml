@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "surquest-GCP-tracer"
-version = "0.0.2rc1"
+version = "0.1.0"
 description = "Wrapper around Google Cloud Platform (GCP) tracing library"
 authors = [
     {name= "Michal Švarc", email= "michal.svarc@surquest.com"}
